@@ -1,11 +1,46 @@
 extends Label
 
 const DEBUG = true
+var debug_menu = false
+var debug_message = ""
 
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
 
-# Called when the node enters the scene tree for the first time.
+var dynamic_font = DynamicFont.new()
+var dynamic_font_size = 6
+
+func ready_fonts():
+	dynamic_font.font_data = load("res://fonts/FORCED SQUARE.ttf")
+	dynamic_font.size = dynamic_font_size
+	self.set("custom_fonts/font", dynamic_font)
+
+func process_debug_label():
+#	if debug_label != null and DEBUG:
+	if DEBUG:
+		if Input.is_action_just_pressed("debug"):
+			debug_menu = !debug_menu
+			
+		if debug_menu:
+			show_debug_menu()
+		else:
+			hide_debug_menu()
+
+func show_debug_menu():
+	self.set_text(debug_message)
+
+func hide_debug_menu():
+	self.set_text("")
+
+## SETGET
+func set_debug_message(new_debug_message: String):
+	debug_message = new_debug_message
+
+## EXECUTION
 func _ready():
-	add_to_group("debug_label")
+	ready_fonts()
+	self.add_to_group("debug_label")
+
+func _process(delta):
+	process_debug_label()

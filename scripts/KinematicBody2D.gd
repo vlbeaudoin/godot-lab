@@ -2,7 +2,9 @@ extends KinematicBody2D
 
 const DEBUG = true
 onready var debug_label = get_tree().get_nodes_in_group("debug_label")[0]
-var debug_menu = false
+
+onready var animated_sprite = $AnimatedSprite
+
 var msg_state
 
 enum {
@@ -19,29 +21,29 @@ var is_dashing = false
 var velocity = Vector2.ZERO
 var input = Vector2()
 
-export var attributes = {"skill" : 5, "stamina" : 5, "luck" : 5, "speed" : 300.0}
-export var friction = 0.15
-export var acceleration = 0.2
+export var attributes = {
+	"skill" : 5, "stamina" : 5, "luck" : 5, \
+	"speed" : 150.0, "friction" : 0.15, "acceleration" : 0.1
+	}
+
 
 ## FUNCS
 func enter_state(new_state):
 	match new_state:
 		IDLE:
 			state = IDLE
-			set_rotation(0)
 		LEFT:
 			state = LEFT
-#			set_rotation(-45)
+			animated_sprite.set_flip_h(true)
 		RIGHT:
 			state = RIGHT
-#			set_rotation(45)
+			animated_sprite.set_flip_h(false)
 
 func get_input():
 	input = Vector2.ZERO
 	
 	if Input.is_action_pressed("movement_left"):
 		input.x += -1
-	
 	if Input.is_action_pressed("movement_right"):
 		input.x += 1
 	if Input.is_action_pressed("movement_up"):
@@ -52,8 +54,7 @@ func get_input():
 	return input
 
 func process_movement():
-	var direction = get_input()
-	
+	# State
 	if input.x < 0:
 		enter_state(LEFT)
 	elif input.x > 0:
@@ -61,26 +62,16 @@ func process_movement():
 	else:
 		enter_state(IDLE)
 	
-	
+	# Direction-controlled movement
+	var direction = get_input()
 	if direction.length() > 0:
-		velocity = lerp(velocity, direction.normalized() * attributes.speed, acceleration)
+		velocity = lerp(velocity, direction.normalized() * attributes.speed, attributes.acceleration)
 	else:
-		velocity = lerp(velocity, Vector2.ZERO, friction)
+		velocity = lerp(velocity, Vector2.ZERO, attributes.friction)
 	
 	velocity = move_and_slide(velocity)
 
-## DEBUG
 func process_debug_label():
-	if debug_label != null and DEBUG:
-		if Input.is_action_just_pressed("debug"):
-			debug_menu = !debug_menu
-			
-		if debug_menu:
-			show_debug_menu()
-		else:
-			hide_debug_menu()
-
-func show_debug_menu():
 	match state:
 				IDLE:
 					msg_state = "Character is idle"
@@ -89,16 +80,12 @@ func show_debug_menu():
 				RIGHT:
 					msg_state = "Character is looking right"
 		
-	debug_label.set_text(
-		"""
-		Velocity: %s
+	debug_label.set_debug_message(
+		"""Velocity: %s
 		State: %s
 		Attributes: %s
-		""" % [str(velocity), msg_state, attributes])
-
-func hide_debug_menu():
-	debug_label.set_text("")
-
+		""" % [str(velocity), msg_state, attributes]
+		)
 
 ## SETGET
 func get_attribute_skill():
@@ -109,6 +96,9 @@ func set_attribute_acceleration(new_acceleration: float):
 
 
 ## EXECUTION
+func _ready():
+	pass
+	
 func _physics_process(_delta):
 	process_debug_label()
 	process_movement()
