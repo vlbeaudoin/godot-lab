@@ -42,5 +42,5 @@ func _ready():
 	ready_fonts()
 	self.add_to_group("debug_label")
 
-func _process(delta):
+func _process(_delta):
 	process_debug_label()
