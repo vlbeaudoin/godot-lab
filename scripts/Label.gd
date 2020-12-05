@@ -4,9 +4,6 @@ const DEBUG = true
 var debug_menu = false
 var debug_message = ""
 
-# Declare member variables here. Examples:
-# var a = 2
-# var b = "text"
 
 var dynamic_font = DynamicFont.new()
 var dynamic_font_size = 6
@@ -17,7 +14,6 @@ func ready_fonts():
 	self.set("custom_fonts/font", dynamic_font)
 
 func process_debug_label():
-#	if debug_label != null and DEBUG:
 	if DEBUG:
 		if Input.is_action_just_pressed("debug"):
 			debug_menu = !debug_menu
